@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="log.pattern" value="[%-5level] %d{HH:mm:ss.SSS} [%thread] %msg [%.50logger.%method:%line] %n"/>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${log.pattern}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="common" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${user.home}/mock/hsf/logs/common.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/common.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <MaxHistory>180</MaxHistory>
+            <maxFileSize>100MB</maxFileSize>
+        </rollingPolicy>
+        <append>true</append>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+    <appender name="error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${user.home}/mock/hsf/logs/error.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>error</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <MaxHistory>180</MaxHistory>
+            <maxFileSize>100MB</maxFileSize>
+        </rollingPolicy>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="console"/>
+    </root>
+
+    <root level="error">
+        <appender-ref ref="error"/>
+    </root>
+
+    <root level="info">
+        <appender-ref ref="common"/>
+    </root>
+</configuration>
