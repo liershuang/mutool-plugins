@@ -29,18 +29,25 @@
         </div>
     </div>
 
-    <form class="layui-form" action="">
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <button type="button" onclick="saveConfig()" class="layui-btn layui-btn-normal">保存</button>
-                <label class="layui-form-label" style="width:150px;">settings.xml文件路径</label>
-                <div class="layui-input-inline" style="width:350px;">
-                    <input type="text" id="settingsFilePath" autocomplete="off" class="layui-input"
-                           placeholder="默认用户目录下.m2/settings.xml">
+    <fieldset class="layui-elem-field">
+        <legend>设置</legend>
+        <div class="layui-field-box">
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <button type="button" onclick="saveConfig()" class="layui-btn layui-btn-normal">保存</button>
+                        <label class="layui-form-label" style="width:150px;">settings.xml文件路径</label>
+                        <div class="layui-input-inline" style="width:350px;">
+                            <input type="text" id="settingsFilePath" autocomplete="off" class="layui-input"
+                                   placeholder="默认用户目录下.m2/settings.xml">
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
-    </form>
+    </fieldset>
+
+
 
     <button type="button" class="layui-btn" id="uploadJar"><i class="layui-icon"></i>导入jar包</button>
 
@@ -204,6 +211,16 @@
             success: function (data) {
                 var methodListHtml = organMethodListHtml(data);
                 $("#methodList").html(methodListHtml);
+            },
+            error: function () {
+                $("#methodList").html("");
+                layui.use('layer', function () {
+                    var layer = layui.layer;
+                    layer.open({
+                        title: '提示',
+                        content: "解析方法异常"
+                    });
+                });
             }
         });
     }
@@ -235,6 +252,7 @@
         return methodListHtml;
     }
 
+    //jar包导入
     layui.use('upload', function () {
         var $ = layui.jquery
             , upload = layui.upload;
@@ -245,8 +263,10 @@
             , url: '/mock/importJar' //改成您自己的上传接口
             , accept: 'file' //普通文件
             , done: function (res) {
-                layer.msg('上传成功');
-                initPage();
+                // layer.msg('上传成功');
+                // initPage();
+                //todo 重新加载页面
+                console.log("上传成功");
             }
         });
     })
