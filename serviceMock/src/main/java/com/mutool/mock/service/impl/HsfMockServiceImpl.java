@@ -2,7 +2,7 @@ package com.mutool.mock.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import com.mutool.mock.config.HsfConfigProperties;
+import com.mutool.mock.model.HsfConfigProperties;
 import com.mutool.mock.helper.HsfHelper;
 import com.mutool.mock.model.HsfServiceInfo;
 import com.mutool.mock.model.JarInfo;

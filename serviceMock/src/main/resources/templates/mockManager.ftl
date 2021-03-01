@@ -91,207 +91,213 @@
     layui.use(['element', 'layer'], function () {
         var element = layui.element;
         var layer = layui.layer;
+
+
+        //初始化页面
+        initPage();
+
+        /**
+         * 初始化页面，加载服务列表，清空方法和mock栏
+         */
+        function initPage() {
+            //设置配置
+            $.ajax({
+                type: "post",
+                url: "/mock/config/getConfig",
+                async: false,
+                success: function (data) {
+                    if (data.code != "200") {
+                        layer.open({title: '提示', content: data.msg, time: 1500});
+                        return;
+                    }
+                    $("#settingsFilePath").val(data.data.settings_file_path);
+                }
+            });
+            //加载service列表
+            $.ajax({
+                type: "post",
+                url: "/mock/queryServiceList",
+                async: false,
+                success: function (data) {
+                    if (data.code != "200") {
+                        layer.open({title: '提示', content: data.msg, time: 1500});
+                        return;
+                    }
+                    var serviceListHtml = organServiceListHtml(data.data);
+                    $("#serviceList").html(serviceListHtml);
+                }
+            });
+        }
+
+        /**
+         * 组织service列表html
+         * @param serviceList
+         * @returns {string}
+         */
+        function organServiceListHtml(serviceList) {
+            if (serviceList == null || serviceList.length == 0) {
+                return '';
+            }
+            var serviceListHtml = '';
+            $.each(serviceList, function (index, value) {
+                serviceListHtml +=
+                    '<tr>' +
+                    '<td class="service" serviceName="' + value.interfaceName + '">' +
+                    value.interfaceName + ':' + '<input type="text" class="versionNumber" value="' + value.version + '">' +
+                    '</td>' +
+                    '</tr>';
+            });
+            return serviceListHtml;
+        }
+
+
+        $(".versionNumber").on('blur', function () {
+            var version = $(this).val();
+            var serviceName = $(this).parent().attr("serviceName");
+            ;
+            $.ajax({
+                type: "post",
+                url: "/mock/updateService",
+                data: {interfaceName: serviceName, version: version},
+                success: function (data) {
+                    if (data.code != "200") {
+                        layer.open({title: '提示', content: data.msg, time: 1500});
+                        return;
+                    }
+                    layer.msg("设置成功");
+                }
+            });
+        })
+
+        //保存mock数据
+        $("#saveMockData").click(function () {
+            var selectedMethod = $(".selectedMethod").attr("methodFullName");
+            if (!selectedMethod) {
+                return;
+            }
+            var mockData = $("#mockData").val();
+            $.ajax({
+                type: "post",
+                url: "/mock/saveMethodMockData",
+                data: {methodFullName: selectedMethod, mockData: mockData},
+                success: function (data) {
+                    if (data.code != "200") {
+                        layer.open({title: '提示', content: data.msg, time: 1500});
+                        return;
+                    }
+                    layer.msg("保存成功");
+                }
+            });
+        })
+
+        $(".service").click(function () {
+            var serviceName = $(this).attr("serviceName");
+            drawMethodList(serviceName);
+            //清空背景色设置当前选择的背景色为灰色
+            $(".service").each(function () {
+                $(this).css("background-color", '#ffffff');
+            });
+            $(this).css("background-color", '#ebedee');
+        })
+
+        $("#methodList").on('click', '.methodName', function () {
+            var methodFullName = $(this).attr("methodFullName");
+            setMethodMockData(methodFullName);
+            //清空背景色设置当前选择的背景色为灰色
+            $(".methodName").each(function () {
+                $(this).css("background-color", '#ffffff');
+                $(this).removeClass("selectedMethod");
+            });
+            $(this).css("background-color", '#ebedee');
+            $(this).addClass("selectedMethod");
+        })
+
+        //渲染方法列表
+        function drawMethodList(serviceName) {
+            $.ajax({
+                type: "post",
+                url: "/mock/queryMethodList",
+                data: {serviceName: serviceName},
+                success: function (data) {
+                    if (data.code != "200") {
+                        layer.open({title: '提示', content: data.msg, time: 1500});
+                        return;
+                    }
+                    var methodListHtml = organMethodListHtml(data.data);
+                    $("#methodList").html(methodListHtml);
+                }
+            });
+        }
+
+        function setMethodMockData(methodFullName) {
+            $.ajax({
+                type: "post",
+                url: "/mock/queryMethodMockData",
+                data: {methodFullName: methodFullName},
+                success: function (data) {
+                    if (data.code != "200") {
+                        layer.open({title: '提示', content: data.msg, time: 1500});
+                        return;
+                    }
+                    $("#mockData").val(data.data);
+                }
+            });
+        }
+
+        /**
+         * 组织方法列表html
+         * @param methodList
+         * @returns {string}
+         */
+        function organMethodListHtml(methodList) {
+            if (methodList == null || methodList.length == 0) {
+                return '';
+            }
+            var methodListHtml = '';
+            $.each(methodList, function (index, value) {
+                methodListHtml += '<tr><td class="methodName" methodFullName="' + value.methodFullName + '">' + value.methodFullName + '</td></tr>';
+            });
+            return methodListHtml;
+        }
+
+        //jar包导入
+        layui.use('upload', function () {
+            var $ = layui.jquery
+                , upload = layui.upload;
+
+            //指定允许上传的文件类型
+            upload.render({
+                elem: '#uploadJar'
+                , url: '/mock/importJar' //改成您自己的上传接口
+                , accept: 'file' //普通文件
+                , done: function (res) {
+                    layer.msg('上传成功');
+                    window.location.reload();
+                }
+            });
+        })
+
+        function saveConfig() {
+            var settingsFilePath = $("#settingsFilePath").val();
+            if (!settingsFilePath) {
+                return;
+            }
+
+            $.ajax({
+                type: "post",
+                url: "/mock/config/setUserSettingsFile",
+                data: {settingsFilePath: settingsFilePath},
+                success: function (data) {
+                    if (data.code != "200") {
+                        layer.open({title: '提示', content: data.msg, time: 1500});
+                        return;
+                    }
+                    layer.msg("设置成功");
+                }
+            });
+        }
+
     });
-
-    //初始化页面
-    initPage();
-
-    /**
-     * 初始化页面，加载服务列表，清空方法和mock栏
-     */
-    function initPage() {
-        //设置配置
-        $.ajax({
-            type: "post",
-            url: "/mock/config/getConfig",
-            async: false,
-            success: function (data) {
-                $("#settingsFilePath").val(data.settings_file_path);
-            }
-        });
-        //加载service列表
-        $.ajax({
-            type: "post",
-            url: "/mock/queryServiceList",
-            async: false,
-            success: function (data) {
-                var serviceListHtml = organServiceListHtml(data);
-                $("#serviceList").html(serviceListHtml);
-            }
-        });
-    }
-
-    /**
-     * 组织service列表html
-     * @param serviceList
-     * @returns {string}
-     */
-    function organServiceListHtml(serviceList) {
-        if (serviceList == null || serviceList.length == 0) {
-            return '';
-        }
-        var serviceListHtml = '';
-        $.each(serviceList, function (index, value) {
-            serviceListHtml +=
-                '<tr>' +
-                '<td class="service" serviceName="' + value.interfaceName + '">' +
-                value.interfaceName + ':' + '<input type="text" class="versionNumber" value="' + value.version + '">' +
-                '</td>' +
-                '</tr>';
-        });
-        return serviceListHtml;
-    }
-
-
-    $(".versionNumber").on('blur', function () {
-        var version = $(this).val();
-        var serviceName = $(this).parent().attr("serviceName");
-        ;
-        $.ajax({
-            type: "post",
-            url: "/mock/updateService",
-            data: {interfaceName: serviceName, version: version},
-            success: function (data) {
-                console.log("接口版本号设置成功");
-            }
-        });
-    })
-
-    //保存mock数据
-    $("#saveMockData").click(function () {
-        var selectedMethod = $(".selectedMethod").attr("methodFullName");
-        if (!selectedMethod) {
-            return;
-        }
-        var mockData = $("#mockData").val();
-        $.ajax({
-            type: "post",
-            url: "/mock/saveMethodMockData",
-            data: {methodFullName: selectedMethod, mockData: mockData},
-            success: function (data) {
-                layui.use('layer', function () {
-                    var layer = layui.layer;
-                    layer.open({
-                        title: '提示',
-                        content: "保存成功"
-                    });
-                });
-            }
-        });
-    })
-
-    $(".service").click(function () {
-        var serviceName = $(this).attr("serviceName");
-        drawMethodList(serviceName);
-        //清空背景色设置当前选择的背景色为灰色
-        $(".service").each(function () {
-            $(this).css("background-color", '#ffffff');
-        });
-        $(this).css("background-color", '#ebedee');
-    })
-
-    $("#methodList").on('click', '.methodName', function () {
-        var methodFullName = $(this).attr("methodFullName");
-        setMethodMockData(methodFullName);
-        //清空背景色设置当前选择的背景色为灰色
-        $(".methodName").each(function () {
-            $(this).css("background-color", '#ffffff');
-            $(this).removeClass("selectedMethod");
-        });
-        $(this).css("background-color", '#ebedee');
-        $(this).addClass("selectedMethod");
-    })
-
-    //渲染方法列表
-    function drawMethodList(serviceName) {
-        $.ajax({
-            type: "post",
-            url: "/mock/queryMethodList",
-            data: {serviceName: serviceName},
-            success: function (data) {
-                var methodListHtml = organMethodListHtml(data);
-                $("#methodList").html(methodListHtml);
-            },
-            error: function () {
-                $("#methodList").html("");
-                layui.use('layer', function () {
-                    var layer = layui.layer;
-                    layer.open({
-                        title: '提示',
-                        content: "解析方法异常"
-                    });
-                });
-            }
-        });
-    }
-
-    function setMethodMockData(methodFullName) {
-        $.ajax({
-            type: "post",
-            url: "/mock/queryMethodMockData",
-            data: {methodFullName: methodFullName},
-            success: function (data) {
-                $("#mockData").val(data);
-            }
-        });
-    }
-
-    /**
-     * 组织方法列表html
-     * @param methodList
-     * @returns {string}
-     */
-    function organMethodListHtml(methodList) {
-        if (methodList == null || methodList.length == 0) {
-            return '';
-        }
-        var methodListHtml = '';
-        $.each(methodList, function (index, value) {
-            methodListHtml += '<tr><td class="methodName" methodFullName="' + value.methodFullName + '">' + value.methodFullName + '</td></tr>';
-        });
-        return methodListHtml;
-    }
-
-    //jar包导入
-    layui.use('upload', function () {
-        var $ = layui.jquery
-            , upload = layui.upload;
-
-        //指定允许上传的文件类型
-        upload.render({
-            elem: '#uploadJar'
-            , url: '/mock/importJar' //改成您自己的上传接口
-            , accept: 'file' //普通文件
-            , done: function (res) {
-                // layer.msg('上传成功');
-                // initPage();
-                //todo 重新加载页面
-                console.log("上传成功");
-            }
-        });
-    })
-
-    function saveConfig() {
-        var settingsFilePath = $("#settingsFilePath").val();
-        if (!settingsFilePath) {
-            return;
-        }
-
-        $.ajax({
-            type: "post",
-            url: "/mock/config/setUserSettingsFile",
-            data: {settingsFilePath: settingsFilePath},
-            success: function (data) {
-                layui.use('layer', function () {
-                    var layer = layui.layer;
-                    layer.open({
-                        title: '提示',
-                        content: "设置成功"
-                    });
-                });
-            }
-        });
-    }
 
 
 </script>

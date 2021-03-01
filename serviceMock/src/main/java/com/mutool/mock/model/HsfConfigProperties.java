@@ -1,4 +1,4 @@
-package com.mutool.mock.config;
+package com.mutool.mock.model;
 
 import cn.hutool.system.SystemUtil;
 import lombok.Data;

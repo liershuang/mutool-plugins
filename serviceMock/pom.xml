@@ -84,6 +84,13 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
+        <!-- mutool核心类库 -->
+        <dependency>
+            <groupId>com.mutool.core</groupId>
+            <artifactId>mutool-core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
         <!--devtools热部署-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

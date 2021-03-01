@@ -1,5 +1,6 @@
 package com.mutool.mock.controller;
 
+import com.mutool.core.exception.ResultBody;
 import com.mutool.mock.util.MockUtil;
 import com.mutool.mock.model.HsfServiceInfo;
 import com.mutool.mock.model.JarInfo;
@@ -96,8 +97,8 @@ public class MockController {
      */
     @ResponseBody
     @RequestMapping("queryMethodMockData")
-    public String queryMethodResult(String methodFullName) throws Exception {
-        return mockService.getMockDataByMethod(methodFullName);
+    public ResultBody<String> queryMethodResult(String methodFullName) throws Exception {
+        return new ResultBody(mockService.getMockDataByMethod(methodFullName));
     }
 
     @ResponseBody

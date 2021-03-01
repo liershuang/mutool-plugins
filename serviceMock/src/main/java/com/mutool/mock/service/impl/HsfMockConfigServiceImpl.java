@@ -1,6 +1,6 @@
 package com.mutool.mock.service.impl;
 
-import com.mutool.mock.config.HsfConfigProperties;
+import com.mutool.mock.model.HsfConfigProperties;
 import com.mutool.mock.service.MockConfigService;
 import org.springframework.stereotype.Service;
 
