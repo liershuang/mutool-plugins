@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mutool.mock.mapper.MethodInfoMapper">
+
+    <sql id="Column_List_WithoutMockData">
+        id, service_id, method_name, method_full_name, return_class
+    </sql>
+
+    <insert id="add" parameterType="com.mutool.mock.bean.model.MethodInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into method_info(service_id,method_name,method_full_name,return_class)
+        values(#{serviceId}, #{methodName}, #{methodFullName}, #{returnClass})
+    </insert>
+
+    <update id="setMockDataByMethodId">
+        update method_info set mock_data = #{mockData} where id = #{methodId}
+    </update>
+
+    <update id="setMockDataByMethodFullName">
+        update method_info set mock_data = #{mockData} where method_full_name = #{methodFullName}
+    </update>
+
+    <delete id="deleteByServiceId">
+        delete from method_info where service_id = #{serviceId}
+    </delete>
+
+    <delete id="deleteByMethodId">
+        delete from method_info where id = #{methodId}
+    </delete>
+
+    <delete id="batchDeleteByServiceId">
+        delete from method_info where service_id in
+        <foreach item="item" index="index" collection="serviceIdList"  open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="queryByServiceId" resultType="com.mutool.mock.bean.model.MethodInfo">
+        select <include refid="Column_List_WithoutMockData"/> from method_info where service_id = #{serviceId}
+    </select>
+
+    <select id="queryList" resultType="com.mutool.mock.bean.model.MethodInfo">
+        select <include refid="Column_List_WithoutMockData"/> from method_info
+        <where>
+            <if test = "className !=null and className != ''">
+                class_name like '%'||#{className}||'%'
+            </if>
+        </where>
+        order by id asc
+    </select>
+
+    <select id="queryMockDataByMethodId" resultType="java.lang.String">
+        select mock_data from method_info where id = #{methodId}
+    </select>
+
+    <select id="queryByMethodFullName" resultType="com.mutool.mock.bean.model.MethodInfo">
+        select <include refid="Column_List_WithoutMockData"/> from method_info where method_full_name = #{methodFullName}
+    </select>
+
+
+</mapper>

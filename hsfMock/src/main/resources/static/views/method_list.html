@@ -1,0 +1,206 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>layuiAdmin 网站用户</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" href="../../layuiadmin/layui/css/layui.css" media="all">
+  <link rel="stylesheet" href="../../layuiadmin/style/admin.css" media="all">
+  <!-- 自定义图标扩展 -->
+  <link rel="stylesheet" href="../../layuiadmin/layui/css/modules/layui-icon-extend/iconfont.css" media="all">
+</head>
+<body>
+
+  <div class="layui-fluid">
+    <div class="layui-card">
+      <div class="layui-form layui-card-header layuiadmin-card-header-auto">
+        <div class="layui-form-item">
+          <div class="layui-inline">
+            <label class="layui-form-label">方法名</label>
+            <div class="layui-input-block">
+              <input type="text" name="methodName" placeholder="请输入" autocomplete="off" class="layui-input">
+            </div>
+          </div>
+          <div class="layui-inline">
+            <button class="layui-btn layuiadmin-btn-useradmin" lay-submit lay-filter="table_search_method">
+              <i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="layui-card-body">
+        <div style="padding-bottom: 10px;">
+          <button id="batchDel" class="layui-btn layuiadmin-btn-useradmin" data-type="batchdel">批量删除</button>
+        </div>
+
+        <table id="method_table" lay-filter="method_table"></table>
+
+        <script type="text/html" id="table-toolbar">
+          <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="mockEdit">
+            <i class="layui-icon layui-icon-edit"></i>mock数据
+          </a>
+          <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+        </script>
+      </div>
+    </div>
+  </div>
+  <!-- 用于临时存放mock数据 -->
+  <input id="jsonData" type="text" style="display:none"/>
+
+  <script src="../../layuiadmin/layui/layui.js"></script>
+  <script>
+  layui.config({
+    base: '../../layuiadmin/' //静态资源所在路径
+  }).extend({
+    index: 'lib/index' //主入口模块
+  }).use(['index', 'table', 'upload'], function(){
+    var $ = layui.$
+    ,form = layui.form
+    ,table = layui.table
+    ,upload = layui.upload,
+    layer = layui.layer;
+
+    //url查询参数解析
+    function getQueryVariable(variable) {
+      var query = window.location.search.substring(1);
+      var vars = query.split("&");
+      for (var i=0;i<vars.length;i++) {
+        var pair = vars[i].split("=");
+        if(pair[0] == variable){return pair[1];}
+      }
+      return(false);
+    }
+
+    var serviceId = getQueryVariable("serviceId");
+    var url = "/mock/queryMethodList"+"?serviceId="+serviceId;
+    table.render({
+      elem: "#method_table",
+      url: url,
+      parseData: function(res){ //res 即为原始返回的数据
+        return {
+          "code": 0, //解析接口状态
+          "msg": res.msg, //解析提示文本
+          "count": 500, //解析数据长度
+          "data": res.data //解析数据列表
+        };
+      },
+      cols: [[{
+        type: "checkbox",
+        fixed: "left"
+      }, {
+        field: "id",
+        title: "ID",
+        width: 50
+      }, {
+        field: "methodName",
+        title: "方法名",
+        width: 200
+      }, {
+        field: "methodFullName",
+        title: "方法全名",
+        minWidth: 300
+      }, {
+        title: "操作",
+        width: 200,
+        align: "center",
+        fixed: "right",
+        toolbar: "#table-toolbar"
+      }]],
+      // page: !0,
+      limit: 30,
+      height: "full-220",
+      text: "对不起，加载出现异常！"
+    });
+
+    //监听搜索
+    form.on('submit(table_search_method)', function(data){
+      debugger;
+      var field = data.field;
+      //执行重载
+      table.reload('method_table', {
+        where: data.field
+      });
+    });
+
+    //表行数据操作
+    table.on('tool(method_table)', function(obj){
+      var data = obj.data;
+      if(obj.event === 'mockEdit'){
+        //打开mock数据编辑框
+        layer.open({
+          type: 2,
+          title: '修改mock数据',
+          shadeClose: false,
+          shade: 0.8,
+          area: ['60%', '60%'],
+          content: 'jsonEditor/index.html?methodId='+data.id
+        });
+      } else if(obj.event === 'del'){
+        $.ajax({
+          url: "/mock/deleteMethod",
+          type: 'POST',
+          traditional: true,
+          data: {"methodId": data.id},
+          success: function (result) {
+            if (result.code == 200) {
+              layer.msg("删除成功", {icon: 6, time: 1000});
+              obj.del();
+            } else {
+              layer.msg(result.msg, {icon: 5});
+            }
+          }
+        });
+      }
+    });
+
+
+    //工具栏事件
+    var active = {
+      batchdel: function(){
+        var checkStatus = table.checkStatus('method_table')
+        ,checkData = checkStatus.data; //得到选中的数据
+
+        if(checkData.length === 0){
+          return layer.msg('请选择数据');
+        }
+        var delIds = "";
+        checkData.forEach(function(n,i){
+          if(i != 0){delIds += ",";}
+          delIds += n.id;
+          return;
+        });
+        if(!delIds){
+          return;
+        }
+        $.ajax({
+          url: '/mock/batchDelteService',
+          type:'post',
+          dataType:'json',
+          data: {"serviceIds": delIds},
+          success:function (data) {
+            if(data.code == '200'){
+              layer.msg('删除成功');
+              table.reload('method_table',{});
+            }else{
+              layer.msg(data.msg);
+            }
+          }
+        });
+      }
+    };
+    
+    $('.layui-btn.layuiadmin-btn-useradmin').on('click', function(){
+      var type = $(this).data('type');
+      active[type] ? active[type].call(this) : '';
+    });
+
+
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+server:
+  port: 18072
+
+#hsf默认版本号及超时时间
+spring:
+  hsf:
+    version: 1.0.0
+    timeout: 6000
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:/Users/connie/Downloads/example.db
+    username: root
+    password: root
+    #初始化模式，有三个值，always为始终执行初始化，embedded只初始化内存数据库（默认值）,如h2等，never为不执行初始化。
+    initialization-mode: always
+    schema: classpath:db/schema.sql
+    #数据初始化语句，默认加载data.sql
+#    data: classpath:db/data.sql
+
+#hsf jar包文件存放位置
+mock:
+  hsf:
+    jar:
+      path: #{systemProperties['user.home']}/mock/hsf/jar
+    data:
+      path: #{systemProperties['user.home']}/mock/hsf/data/
+
+#spring.messages.encoding=UTF-8
+#spring.freemarker.suffix=.ftl
+#spring.freemarker.cache=false
+#spring.freemarker.charset=UTF-8
+#设置开启热部署
+#spring.devtools.restart.enabled=true
+#重启目录
+#spring.devtools.restart.additional-paths=src/main/java
+#日志设置
+#logging.level.root=debug
+logging:
+  level:
+    com:
+      mutool: debug
+  config: classpath:logback-spring.xml
+
+mybatis-plus:
+  configuration:
+    cache-enabled: false
+    default-executor-type: reuse
+    jdbc-type-for-null: 'null'
+    lazy-loading-enabled: true
+    local-cache-scope: session
+    map-underscore-to-camel-case: true
+    default-enum-type-handler: org.apache.ibatis.type.EnumTypeHandler
+  mapper-locations: classpath*:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: auto
+      #      table-prefix: sys_
+      #逻辑删除配置
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      insert-strategy: not_null
+      update-strategy: not_null
+      select-strategy: not_empty
+    banner: false
+  #    super-mapper-class: org.crown.framework.mapper.BaseMapper
+  #  type-enums-package: org.crown.common.enums,org.crown.framework.enums
+  type-aliases-package: com.mutool.*.*.entity
+  type-handlers-package: org.crown.framework.mybatisplus.typehandler

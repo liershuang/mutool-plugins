@@ -1,0 +1,254 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>layuiAdmin 网站用户</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" href="../../layuiadmin/layui/css/layui.css" media="all">
+  <link rel="stylesheet" href="../../layuiadmin/style/admin.css" media="all">
+  <!-- 自定义图标扩展 -->
+  <link rel="stylesheet" href="../../layuiadmin/layui/css/modules/layui-icon-extend/iconfont.css" media="all">
+</head>
+<body>
+
+  <div class="layui-fluid">
+    <div class="layui-card">
+      <div class="layui-form layui-card-header layuiadmin-card-header-auto">
+        <div class="layui-form-item">
+          <div class="layui-inline">
+            <label class="layui-form-label">类名</label>
+            <div class="layui-input-block">
+              <input type="text" name="className" placeholder="请输入" autocomplete="off" class="layui-input">
+            </div>
+          </div>
+          <div class="layui-inline">
+            <button class="layui-btn layuiadmin-btn-useradmin" lay-submit lay-filter="table_search">
+              <i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="layui-card-body">
+        <div style="padding-bottom: 10px;">
+          <button type="button" class="layui-btn" id="jar-upload"><i class="layui-icon"></i>上传文件</button>
+          <button id="batchDel" class="layui-btn layuiadmin-btn-useradmin" data-type="batchdel">批量删除</button>
+
+          <button id="exitSystem" style="float:right;" class="layui-btn layui-btn-danger">
+            <i class="layui-icon layui-extend-exit" style="font-size: 20px;"></i>
+            退出系统
+          </button>
+        </div>
+
+        <table id="table_service" lay-filter="table_service"></table>
+
+        <script type="text/html" id="onlineStatusTpl">
+          {{#  if(d.onlineStatus == 1){ }}
+            在线
+          {{#  } else { }}
+            离线
+          {{#  } }}
+        </script>
+
+        <script type="text/html" id="row_operate">
+          <a href="method_list.html?serviceId={{d.id}}" target="_blank" class="layui-btn layui-btn-normal layui-btn-xs">
+            <i class="layui-icon layui-icon-edit"></i>查看方法列表
+          </a>
+          <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+        </script>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../layuiadmin/layui/layui.js"></script>
+  <script>
+  layui.config({
+    base: '../../layuiadmin/' //静态资源所在路径
+  }).extend({
+    index: 'lib/index' //主入口模块
+  }).use(['index', 'table', 'upload'], function(){
+    var $ = layui.$
+    ,form = layui.form
+    ,table = layui.table
+    ,upload = layui.upload,
+    layer = layui.layer;
+
+    //jar包上传
+    upload.render({
+      elem: '#jar-upload'
+      ,url: '/mock/importJar'
+      ,accept: 'file' //普通文件
+      ,exts: 'jar' //只允许上传jar文件
+      ,done: function(res){
+        console.log(res)
+      }
+    });
+
+    table.render({
+      elem: "#table_service",
+      url: "/mock/queryServiceList",
+      parseData: function(res){ //res 即为原始返回的数据
+        return {
+          "code": 0, //解析接口状态
+          "msg": res.msg, //解析提示文本
+          "count": 500, //解析数据长度
+          "data": res.data //解析数据列表
+        };
+      },
+      cols: [[{
+        type: "checkbox",
+        fixed: "left"
+      }, {
+        field: "id",
+        title: "ID",
+        // sort: !0,
+        width: 50
+      }, {
+        field: "className",
+        title: "类名",
+        minWidth: 300
+      }, {
+        field: "version",
+        title: "版本号",
+        width: 80,
+        edit:'text'
+      }, {
+        field: "onlineStatus",
+        title: "在线状态",
+        templet: "#onlineStatusTpl",
+        width: 100
+      }, {
+        title: "操作",
+        width: 200,
+        align: "center",
+        fixed: "right",
+        toolbar: "#row_operate"
+      }]],
+      // page: !0,
+      limit: 30,
+      height: "full-220",
+      text: "对不起，加载出现异常！"
+    });
+
+    //监听搜索
+    form.on('submit(table_search)', function(data){
+      //执行重载
+      table.reload('table_service', {
+        where: data.field
+      });
+    });
+
+    //监听单元格编辑
+    table.on('edit(table_service)', function (obj) {
+      debugger;
+      $('input').keyup(function () {
+        value = value.replace(/[^d.]/g, '');
+      });
+      var value = obj.value, // 得到修改后的值
+            id = obj.data.id, // 得到当前修改行的id
+            field = obj.field; // 得到当前修改的字段名
+
+      if(field == "version"){
+        $.ajax({
+          url: "/mock/updateServiceVersion",
+          type: 'POST',
+          traditional: true,
+          data: {"serviceId":id, "version":value},
+          success: function (data) {
+            if (data.code == 200) {
+              layer.msg("修改成功", {icon: 6, time: 1000});
+            } else {
+              layer.msg(data.msg, {icon: 5});
+            }
+          }
+        });
+      }
+    });
+
+    //表行数据操作
+    table.on('tool(table_service)', function(obj){
+      var data = obj.data;
+      if(obj.event === 'del'){
+        $.ajax({
+          url: "/mock/deleteService",
+          type: 'POST',
+          traditional: true,
+          data: {"serviceId": data.id},
+          success: function (result) {
+            if (result.code == 200) {
+              layer.msg("删除成功", {icon: 6, time: 1000});
+              obj.del();
+            } else {
+              layer.msg(result.msg, {icon: 5});
+            }
+          }
+        });
+      }
+    });
+  
+    //事件
+    var active = {
+      batchdel: function(){
+        var checkStatus = table.checkStatus('table_service')
+        ,checkData = checkStatus.data; //得到选中的数据
+
+        if(checkData.length === 0){
+          return layer.msg('请选择数据');
+        }
+        var delIds = "";
+        checkData.forEach(function(n,i){
+          if(i != 0){delIds += ",";}
+          delIds += n.id;
+          return;
+        });
+        if(!delIds){
+          return;
+        }
+
+        $.ajax({
+          url: '/mock/batchDelteService',
+          type:'post',
+          dataType:'json',
+          data: {"serviceIds": delIds},
+          success:function (data) {
+            if(data.code == '200'){
+              layer.msg('删除成功', {time: 1000});
+              table.reload('table_service',{});
+            }else{
+              layer.msg(data.msg);
+            }
+          }
+        });
+      }
+    };
+    
+    $('.layui-btn.layuiadmin-btn-useradmin').on('click', function(){
+      var type = $(this).data('type');
+      active[type] ? active[type].call(this) : '';
+    });
+
+    //退出系统
+    $("#exitSystem").on('click',function(){
+      $.ajax({
+        url: '/common/exitSystem',
+        type:'post',
+        dataType:'json',
+        data: {},
+        success:function (data) {
+          if(data.code == '200'){
+            layer.msg('退出成功', {time: 1000});
+          }else{
+            layer.msg('退出失败');
+          }
+        }
+      })
+    })
+
+  });
+  </script>
+</body>
+</html>

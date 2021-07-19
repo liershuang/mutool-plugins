@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mutool.mock.mapper.ServiceApiMapper">
+
+    <insert id="add" parameterType="com.mutool.mock.bean.model.ServiceApi" useGeneratedKeys="true" keyProperty="id">
+        insert into service_api(class_name,version,online_status) values(#{className}, #{version}, #{onlineStatus})
+    </insert>
+
+    <update id="updateOnlineStatus">
+        update service_api set online_status = #{onlineStatus} where class_name = #{className}
+    </update>
+
+    <update id="updateServiceVersionByClassName">
+        update service_api set version = #{version} where class_name = #{className}
+    </update>
+
+    <update id="updateServiceVersionByServiceId">
+        update service_api set version = #{version} where id = #{serviceId}
+    </update>
+
+    <update id="offlineAllService">
+        update service_api set online_status = '0'
+    </update>
+
+    <delete id="deleteByServiceId">
+        delete from service_api where id = #{serviceId}
+    </delete>
+
+    <delete id="batchDelete">
+        delete from service_api where id in
+        <foreach item="item" index="index" collection="serviceIdList"  open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="queryListByClassNameLike" resultType="com.mutool.mock.bean.model.ServiceApi">
+        select * from service_api
+        <where>
+            <if test="className != null and className != ''">
+                class_name like '%'||#{className}||'%'
+            </if>
+        </where>
+        order by id asc
+    </select>
+
+    <select id="queryByClassName" resultType="com.mutool.mock.bean.model.ServiceApi">
+        select * from service_api where class_name = #{className}
+    </select>
+
+    <select id="queryServiceApiByServiceId" resultType="com.mutool.mock.bean.model.ServiceApi">
+        select * from service_api where id = #{serviceId}
+    </select>
+
+
+</mapper>
