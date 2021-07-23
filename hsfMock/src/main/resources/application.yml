@@ -7,15 +7,15 @@ spring:
     version: 1.0.0
     timeout: 6000
   datasource:
-    driver-class-name: org.sqlite.JDBC
-    url: jdbc:sqlite:/Users/connie/Downloads/example.db
-    username: root
-    password: root
+#    driver-class-name: org.sqlite.JDBC
+#    url: jdbc:sqlite:/Users/connie/Downloads/example.db
+#    username: root
+#    password: root
     #初始化模式，有三个值，always为始终执行初始化，embedded只初始化内存数据库（默认值）,如h2等，never为不执行初始化。
     initialization-mode: always
-    schema: classpath:db/schema.sql
+    schema: classpath*:db/schema.sql
     #数据初始化语句，默认加载data.sql
-#    data: classpath:db/data.sql
+    data: classpath*:db/data.sql
 
 #hsf jar包文件存放位置
 mock:

@@ -1,6 +1,8 @@
 package com.mutool.mock.util;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,6 +23,7 @@ import java.util.jar.JarFile;
  * 作者：les<br>
  * 日期：2021/2/1 13:59<br>
  */
+@Slf4j
 public class JarUtil {
 
     /**
@@ -142,18 +145,23 @@ public class JarUtil {
         return jarClassNameList;
     }
 
-    public static void main(String[] args) throws IOException {
-        String jarPath = "/Users/connie/Public/maven_repository/com/mutool/box/plugin/mock/hsf-mock/0.0.1-SNAPSHOT/hsf-mock-0.0.1-SNAPSHOT.jar";
-        System.out.println(listFileFromJar(jarPath, (name) -> name.endsWith(".class")));
-
-        /*String hsf = readJarFile(jarPath, "/hsf-provider-beans.xml");
-        System.out.println(hsf);
-        Document hsfxml = XmlUtil.readXML(hsf);
-
-        List<Element> eles = XmlUtil.getElements(hsfxml.getDocumentElement(), "hsf:provider");
-        for(Element ele : eles){
-            System.out.println(ele.getAttribute("interface"));
-        }*/
+    /**
+     * 添加jar到系统中
+     * @param jarDir jar包目录
+     */
+    public static void addJarToServer(String jarDir) {
+        //将jar路径下所有文件加载到内存中
+        List<File> jarList = FileUtil.loopFiles(jarDir, i -> i.getName().endsWith(".jar"));
+        jarList.forEach(i -> {
+            try {
+                log.debug("添加jar到系统中，jar路径：{}", i.getAbsolutePath());
+                JarUtil.addJarClassToSystem(i);
+            } catch (Exception e) {
+                log.error("添加jar到系统中异常", e);
+            }
+        });
+        log.info("添加jar包到系统完成");
     }
+
 
 }

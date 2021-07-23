@@ -1,5 +1,6 @@
 package com.mutool.mock.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.mutool.core.exception.BizException;
 import com.mutool.mock.bean.model.MethodInfo;
 import com.mutool.mock.bean.model.ServiceApi;
@@ -38,6 +39,12 @@ public class MethodInfoServiceImpl implements MethodInfoService {
         }
         methodInfoMapper.add(methodInfo);
         return methodInfo.getId();
+    }
+
+    @Override
+    public String getMethodMockData(String methodFullName) {
+        MethodInfo methodInfo = methodInfoMapper.queryByMethodFullName(methodFullName);
+        return StrUtil.blankToDefault(methodInfo.getMockData(), "");
     }
 
     @Override

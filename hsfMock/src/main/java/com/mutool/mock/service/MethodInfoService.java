@@ -16,6 +16,8 @@ public interface MethodInfoService {
      */
     Integer addMethodInfo(MethodInfo methodInfo);
 
+    String getMethodMockData(String methodFullName);
+
     /**
      * 根据方法名解析方法并保存
      * @param serviceId

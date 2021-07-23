@@ -42,6 +42,7 @@ public class MavenUtil {
         request.setGoals(Collections.singletonList("compile"));
         //设置settings文件
         //String settingsFilePath = ConfigUtil.get(ConfigConstant.KEY_SETTINGS_FILE_PATH);
+        //todo 取配置
         String settingsFilePath = "/Users/connie/.m2/settings_servyou.xml";
         if (StrUtil.isNotBlank(settingsFilePath)) {
             request.setUserSettingsFile(new File(settingsFilePath));

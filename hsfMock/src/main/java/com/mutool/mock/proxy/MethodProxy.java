@@ -2,7 +2,8 @@ package com.mutool.mock.proxy;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.mutool.mock.service.ApiLoadService;
+import com.mutool.mock.helper.HsfHelper;
+import com.mutool.mock.service.MethodInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,8 @@ import java.lang.reflect.Method;
 @Component
 public class MethodProxy implements InvocationHandler {
     @Autowired
-    private ApiLoadService mockService;
+    private MethodInfoService methodInfoService;
+
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -34,7 +36,7 @@ public class MethodProxy implements InvocationHandler {
         } else {
             log.info("开始调用方法，方法名：{}", method.toString());
             //根据方法名返回对应的方法配置的json结果数据
-            String methodMockData = mockService.getMockDataByMethod(method.toString());
+            String methodMockData = methodInfoService.getMethodMockData(method.toString());
             if (StrUtil.isBlank(methodMockData)) {
                 return null;
             }

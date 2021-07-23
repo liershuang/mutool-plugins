@@ -40,6 +40,15 @@ public class MockController {
     private ServiceApiService serviceApiService;
 
     /**
+     * todo 1、方法名称筛选无效排查
+     * todo 2、方法批量删除无效问题排查
+     * todo 3、集成框架平台
+     * todo 4、增加设置菜单，配置mavensettings路径
+     * todo 5、集成菜单自定义功能，先取数据库菜单数据再取各系统自定义菜单，自定义菜单优先展示
+     * todo 6、增加菜单功能说明，每个菜单一个问好按钮，点击弹出使用说明
+     */
+
+    /**
      * 导入服务jar包
      *
      * @return

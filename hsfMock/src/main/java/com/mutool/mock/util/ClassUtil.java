@@ -1,6 +1,10 @@
 package com.mutool.mock.util;
 
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSON;
+import cn.hutool.json.JSONConfig;
+import cn.hutool.json.JSONUtil;
 import com.mutool.mock.model.MethodMsg;
 
 import java.lang.reflect.Method;
@@ -40,6 +44,23 @@ public class ClassUtil extends cn.hutool.core.util.ClassUtil {
         }
 
         return methodInfoList;
+    }
+
+    /**
+     * class对象转json字符串
+     *
+     * @param clazz
+     * @return
+     */
+    //问题解决：返回class对象为list时无法实例化
+    public String turnClassToJson(Class clazz) throws IllegalAccessException, InstantiationException {
+        Object returnObj = clazz.newInstance();
+        if (!StrUtil.isBlank(String.valueOf(returnObj))) {
+            //转json，设置空值不忽略
+            JSON returnJSON = JSONUtil.parse(returnObj, JSONConfig.create().setIgnoreNullValue(false));
+            return JSONUtil.toJsonStr(returnJSON);
+        }
+        return "";
     }
 
 

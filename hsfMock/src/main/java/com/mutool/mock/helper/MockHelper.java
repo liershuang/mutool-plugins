@@ -17,7 +17,7 @@ import com.mutool.mock.service.MethodInfoService;
 import com.mutool.mock.service.MockConfigService;
 import com.mutool.mock.service.ServiceApiService;
 import com.mutool.mock.util.ClassUtil;
-import com.mutool.mock.util.SystemUtil;
+import com.mutool.mock.util.JarUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -89,7 +89,7 @@ public class MockHelper {
     }
 
     public void addJarToServer(){
-        SystemUtil.addJarToServer(mockConfigService.getConfig().getJarPath());
+        JarUtil.addJarToServer(mockConfigService.getConfig().getJarPath());
     }
 
     /**
