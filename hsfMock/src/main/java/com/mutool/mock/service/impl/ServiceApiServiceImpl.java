@@ -41,4 +41,22 @@ public class ServiceApiServiceImpl implements ServiceApiService {
         return num;
     }
 
+    @Override
+    public List<ServiceApi> queryServiceList(String className) {
+        return serviceApiMapper.queryListByClassNameLike(className);
+    }
+
+    @Override
+    public void updateServiceVersion(Integer serviceId, String version) {
+        serviceApiMapper.updateServiceVersionByServiceId(serviceId, version);
+    }
+
+    @Override
+    public void deleteService(Integer serviceId) {
+        serviceApiMapper.deleteByServiceId(serviceId);
+        methodInfoMapper.deleteByServiceId(serviceId);
+    }
+
+
+
 }

@@ -1,30 +1,16 @@
 package com.mutool.mock.helper;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSON;
-import cn.hutool.json.JSONConfig;
-import cn.hutool.json.JSONUtil;
-import com.mutool.mock.model.HsfConfigProperties;
-import com.mutool.mock.constants.MockConstant;
 import com.mutool.mock.model.HsfServiceInfo;
-import com.mutool.mock.model.JarInfo;
-import com.mutool.mock.model.MethodMsg;
 import com.mutool.mock.proxy.MockInvoker;
-import com.mutool.mock.service.MockConfigService;
-import com.mutool.mock.util.ClassUtil;
 import com.mutool.mock.util.JarUtil;
 import com.taobao.hsf.app.api.util.HSFApiProviderBean;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -35,9 +21,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class HsfHelper {
-
-    @Autowired
-    private MockConfigService<HsfConfigProperties> mockConfigService;
 
     /**
      * 注册jar包到注册中心

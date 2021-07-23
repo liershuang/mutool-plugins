@@ -15,4 +15,9 @@ public interface ServiceApiService {
 
     Integer batchDelete(List<Integer> serviceIdList);
 
+    List<ServiceApi> queryServiceList(String className);
+
+    void updateServiceVersion(Integer serviceId, String version);
+
+    void deleteService(Integer serviceId);
 }

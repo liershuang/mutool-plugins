@@ -1,9 +1,10 @@
 package com.mutool.mock.service.impl;
 
 import cn.hutool.core.io.FileUtil;
+import com.mutool.mock.model.HsfConfigProperties;
 import com.mutool.mock.service.UploadService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,11 +20,12 @@ import java.io.*;
 @Service
 public class UploadServiceImpl implements UploadService {
 
-    @Value("${mock.hsf.jar.path}")
-    private String fileUploadPath;
+    @Autowired
+    private HsfConfigProperties hsfConfigProperties;
 
     @Override
     public String fileUpload(MultipartFile file) {
+        String fileUploadPath = hsfConfigProperties.getJarPath();
         if (file == null || file.isEmpty()) {
             throw new RuntimeException("未选择需上传的文件");
         }
@@ -51,7 +53,7 @@ public class UploadServiceImpl implements UploadService {
 
     @Override
     public void fileDownload(String fileName, HttpServletResponse response) {
-        File file = new File(fileUploadPath + File.separator + fileName);
+        File file = new File(hsfConfigProperties.getJarPath() + fileName);
         if (!file.exists()) {
             throw new RuntimeException(fileName + "文件不存在");
         }

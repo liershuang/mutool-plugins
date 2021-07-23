@@ -2,6 +2,8 @@ package com.mutool.mock.service;
 
 import com.mutool.mock.bean.model.MethodInfo;
 
+import java.util.List;
+
 /**
  * 描述：<br>
  * 作者：les<br>
@@ -31,4 +33,12 @@ public interface MethodInfoService {
      * @param mockData
      */
     void setMockDataByMethodFullName(String methodFullName, String mockData);
+
+    List<MethodInfo> queryMethodsByServiceId(Integer serviceId);
+
+    String queryMockDataByMethodId(Integer methodId);
+
+    void setMockData(Integer methodId, String mockData);
+
+    void deleteMethod(Integer methodId);
 }

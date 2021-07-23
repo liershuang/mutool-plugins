@@ -8,7 +8,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @MapperScan("com.mutool.**.mapper")
-@SpringBootApplication(scanBasePackages = {"com.mutool"})
+@SpringBootApplication(scanBasePackages = {"com.mutool.mock", "com.mutool.commonweb", "com.mutool.framework"})
 public class ServiceMockApplication {
 
     public static void main(String[] args) throws Exception {

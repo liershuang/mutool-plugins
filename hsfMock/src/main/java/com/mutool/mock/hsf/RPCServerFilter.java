@@ -4,7 +4,6 @@ import com.taobao.hsf.invocation.Invocation;
 import com.taobao.hsf.invocation.InvocationHandler;
 import com.taobao.hsf.invocation.RPCResult;
 import com.taobao.hsf.invocation.filter.ClientFilter;
-import com.taobao.hsf.invocation.filter.RPCFilter;
 import com.taobao.hsf.util.concurrent.ListenableFuture;
 
 /**

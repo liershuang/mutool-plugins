@@ -8,7 +8,6 @@ import com.mutool.mock.mapper.MethodInfoMapper;
 import com.mutool.mock.mapper.ServiceApiMapper;
 import com.mutool.mock.model.MethodMsg;
 import com.mutool.mock.service.MethodInfoService;
-import com.mutool.mock.service.ServiceApiService;
 import com.mutool.mock.util.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +80,38 @@ public class MethodInfoServiceImpl implements MethodInfoService {
     @Override
     public void setMockDataByMethodFullName(String methodFullName, String mockData){
         methodInfoMapper.setMockDataByMethodFullName(methodFullName, mockData);
+    }
+
+    /**
+     * 根据serviceId查询方法列表
+     *
+     * @param serviceId
+     * @return
+     */
+    @Override
+    public List<MethodInfo> queryMethodsByServiceId(Integer serviceId) {
+        return methodInfoMapper.queryByServiceId(serviceId);
+    }
+
+    /**
+     * 根据方法id查询方法mock数据
+     *
+     * @param methodId
+     * @return
+     */
+    @Override
+    public String queryMockDataByMethodId(Integer methodId) {
+        return methodInfoMapper.queryMockDataByMethodId(methodId);
+    }
+
+    @Override
+    public void setMockData(Integer methodId, String mockData) {
+        methodInfoMapper.setMockDataByMethodId(methodId, mockData);
+    }
+
+    @Override
+    public void deleteMethod(Integer methodId) {
+        methodInfoMapper.deleteByMethodId(methodId);
     }
 
 }

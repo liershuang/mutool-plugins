@@ -3,20 +3,14 @@ package com.mutool.mock.helper;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import com.mutool.core.exception.BizException;
-import com.mutool.mock.bean.model.MethodInfo;
 import com.mutool.mock.bean.model.ServiceApi;
 import com.mutool.mock.constants.MockConstant;
 import com.mutool.mock.enums.YnEnum;
-import com.mutool.mock.mapper.MethodInfoMapper;
 import com.mutool.mock.mapper.ServiceApiMapper;
 import com.mutool.mock.model.HsfConfigProperties;
 import com.mutool.mock.model.HsfServiceInfo;
-import com.mutool.mock.model.MethodMsg;
 import com.mutool.mock.service.MethodInfoService;
-import com.mutool.mock.service.MockConfigService;
 import com.mutool.mock.service.ServiceApiService;
-import com.mutool.mock.util.ClassUtil;
 import com.mutool.mock.util.JarUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +36,8 @@ public class MockHelper {
     private MethodInfoService methodInfoService;
     @Autowired
     private ServiceApiMapper serviceApiMapper;
-
     @Autowired
-    private MockConfigService<HsfConfigProperties> mockConfigService;
+    private HsfConfigProperties hsfConfigProperties;
 
     /**
      * 注册jar包到注册中心
@@ -65,7 +58,7 @@ public class MockHelper {
         //遍历所有jar加载到内存中
         addJarToServer();
         //过滤jar包直接目录下jar并解析其中service接口作为微服务接口，因直接目录下都是导入的jar
-        List<File> servceJarList = FileUtil.loopFiles(new File(mockConfigService.getConfig().getJarPath()), 1,
+        List<File> servceJarList = FileUtil.loopFiles(new File(hsfConfigProperties.getJarPath()), 1,
                 i -> i.getName().endsWith(".jar"));
         //设置所有接口状态为离线
         serviceApiMapper.offlineAllService();
@@ -89,7 +82,7 @@ public class MockHelper {
     }
 
     public void addJarToServer(){
-        JarUtil.addJarToServer(mockConfigService.getConfig().getJarPath());
+        JarUtil.addJarToServer(hsfConfigProperties.getJarPath());
     }
 
     /**
