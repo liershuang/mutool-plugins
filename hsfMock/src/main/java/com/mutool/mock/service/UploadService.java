@@ -2,6 +2,7 @@ package com.mutool.mock.service;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -19,6 +20,19 @@ public interface UploadService {
      */
     String fileUpload(MultipartFile file);
 
-    void fileDownload(String fileName, HttpServletResponse response);
+    /**
+     * 下载jar包文件
+     * @param fileName jar文件名
+     * @param response
+     */
+    void downloadJarFile(String fileName, HttpServletResponse response);
+
+    /**
+     * 下载文件内容
+     * @param fileName 文件名
+     * @param data 文件内容
+     * @param response
+     */
+    void downloadFile(String fileName, String data, HttpServletRequest request, HttpServletResponse response);
 
 }

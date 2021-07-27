@@ -1,7 +1,12 @@
 package com.mutool.mock.controller;
 
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.lang.TypeReference;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
+import com.mutool.core.exception.BizException;
 import com.mutool.core.exception.ResultBody;
+import com.mutool.mock.bean.dto.ServiceMock;
 import com.mutool.mock.bean.model.MethodInfo;
 import com.mutool.mock.bean.model.ServiceApi;
 import com.mutool.mock.enums.YnEnum;
@@ -10,13 +15,21 @@ import com.mutool.mock.model.HsfServiceInfo;
 import com.mutool.mock.service.MethodInfoService;
 import com.mutool.mock.service.ServiceApiService;
 import com.mutool.mock.service.UploadService;
+import com.mutool.mock.util.FileUtil;
 import com.mutool.mock.util.MavenUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotNull;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +38,8 @@ import java.util.stream.Collectors;
  * 作者：les<br>
  * 日期：2021/1/31 22:19<br>
  */
+@Slf4j
+@Validated
 @Controller
 @RequestMapping("mock")
 public class MockController {
@@ -33,8 +48,6 @@ public class MockController {
     private UploadService uploadService;
     @Autowired
     private MockHelper mockHelper;
-    //@Autowired
-    //private MockService mockService;
     @Autowired
     private MethodInfoService methodInfoService;
     @Autowired
@@ -42,11 +55,6 @@ public class MockController {
 
     /**
      * todo 1、方法名称筛选无效排查
-     * todo 2、方法批量删除无效问题排查
-     * todo 3、集成框架平台
-     * todo 4、增加设置菜单，配置mavensettings路径
-     * todo 5、集成菜单自定义功能，先取数据库菜单数据再取各系统自定义菜单，自定义菜单优先展示
-     * todo 6、增加菜单功能说明，每个菜单一个问好按钮，点击弹出使用说明
      */
 
     /**
@@ -70,6 +78,12 @@ public class MockController {
         List<HsfServiceInfo> successServiceList = mockHelper.registerServcie(jarPath);
         mockHelper.batchSetOnlineStatus(successServiceList, YnEnum.YES);
         return jarPath;
+    }
+
+    @ResponseBody
+    @RequestMapping("queryServiceById")
+    public ServiceApi queryServiceById(Integer id) {
+        return serviceApiService.queryServiceById(id);
     }
 
     /**
@@ -119,7 +133,7 @@ public class MockController {
      */
     @ResponseBody
     @RequestMapping("setMockData")
-    public void saveMethodMockData(Integer methodId, String mockData) throws Exception {
+    public void saveMethodMockData(@NotNull(message = "方法id不能为空") Integer methodId, String mockData) {
         methodInfoService.setMockData(methodId, mockData);
     }
 
@@ -143,33 +157,48 @@ public class MockController {
         methodInfoService.deleteMethod(methodId);
     }
 
+    @ResponseBody
+    @RequestMapping("batchDelteMethod")
+    public void batchDelteMethod(String delIds){
+        List<Integer> idList = ListUtil.toList(delIds.split(",")).stream()
+                .map(i -> Integer.parseInt(i)).collect(Collectors.toList());
+        methodInfoService.batchDelete(idList);
+    }
+
     /**
      * 导出mock数据
-     *
-     * @param methodId
-     * @return
-     * @throws Exception
+     * @param serviceIds serviceId列表
+     * @param response
      */
     @ResponseBody
     @RequestMapping("exportMockData")
-    public void exportMockData(Integer methodId) throws Exception {
-        String mockData = methodInfoService.queryMockDataByMethodId(methodId);
-        //todo 下载数据文件
+    public void exportMockData(String serviceIds, HttpServletRequest request, HttpServletResponse response) {
+        List<Integer> idList = Collections.emptyList();
+        if(StrUtil.isNotBlank(serviceIds)){
+            idList = ListUtil.toList(serviceIds.split(",")).stream()
+                    .map(i -> Integer.parseInt(i)).collect(Collectors.toList());
+        }
+        List<ServiceMock> serviceMockDataList = serviceApiService.queryServiceMockData(idList);
+        String jsonData = JSONUtil.toJsonStr(serviceMockDataList);
+        uploadService.downloadFile("hsf-mock数据.json", jsonData, request, response);
     }
 
     /**
      * 导入mock数据
-     *
-     * @param methodFullName
-     * @return
-     * @throws Exception
+     * @param file
      */
     @ResponseBody
     @RequestMapping("importMockData")
-    public String importMockData(String methodFullName) throws Exception {
-        //jarName为空时查询所有
-
-        return "";
+    public void importMockData(MultipartFile file) {
+        String fileContent = "";
+        try {
+            fileContent = FileUtil.readMultipartFile(file);
+        } catch (IOException e) {
+            log.error("文件内容读取失败", e);
+            throw new BizException("文件内容读取失败");
+        }
+        List<ServiceMock> serviceMockList = JSONUtil.toBean(fileContent, new TypeReference<List<ServiceMock>>() {}, true);
+        serviceApiService.importMockData(serviceMockList);
     }
 
 

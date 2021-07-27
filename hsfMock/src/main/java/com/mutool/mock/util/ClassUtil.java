@@ -53,7 +53,8 @@ public class ClassUtil extends cn.hutool.core.util.ClassUtil {
      * @return
      */
     //问题解决：返回class对象为list时无法实例化
-    public String turnClassToJson(Class clazz) throws IllegalAccessException, InstantiationException {
+    //todo 返回对象为Integer等基本数据类型无法转换
+    public static String turnClassToJson(Class clazz) throws IllegalAccessException, InstantiationException {
         Object returnObj = clazz.newInstance();
         if (!StrUtil.isBlank(String.valueOf(returnObj))) {
             //转json，设置空值不忽略

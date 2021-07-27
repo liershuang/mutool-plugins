@@ -38,7 +38,14 @@ public interface ServiceApiMapper {
 
     void deleteByServiceId(Integer serviceId);
 
-    ServiceApi queryServiceApiByServiceId(@Param("serviceId")Integer serviceId);
+    ServiceApi queryServiceApiById(@Param("serviceId")Integer serviceId);
 
     Integer batchDelete(@Param("serviceIdList") List<Integer> serviceIdList);
+
+    /**
+     * 根据id列表查询列表数据
+     * @param idList id列表（可为空，为空时查询所有）
+     * @return
+     */
+    List<ServiceApi> queryServiceList(@Param("idList") List<Integer> idList);
 }

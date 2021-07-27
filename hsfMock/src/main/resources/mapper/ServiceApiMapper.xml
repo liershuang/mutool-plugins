@@ -47,8 +47,20 @@
         select * from service_api where class_name = #{className}
     </select>
 
-    <select id="queryServiceApiByServiceId" resultType="com.mutool.mock.bean.model.ServiceApi">
+    <select id="queryServiceApiById" resultType="com.mutool.mock.bean.model.ServiceApi">
         select * from service_api where id = #{serviceId}
+    </select>
+
+    <select id="queryServiceList" resultType="com.mutool.mock.bean.model.ServiceApi">
+        select * from service_api
+        <where>
+            <if test="idList != null and idList.size() > 0">
+                id in
+                <foreach item="item" index="index" collection="idList"  open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
     </select>
 
 

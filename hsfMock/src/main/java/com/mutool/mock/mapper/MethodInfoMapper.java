@@ -1,5 +1,6 @@
 package com.mutool.mock.mapper;
 
+import com.mutool.mock.bean.dto.MethodMock;
 import com.mutool.mock.bean.model.MethodInfo;
 import org.apache.ibatis.annotations.Param;
 
@@ -20,6 +21,8 @@ public interface MethodInfoMapper {
      * @return
      */
     List<MethodInfo> queryByServiceId(@Param("serviceId") Integer serviceId);
+
+    List<MethodMock> queryMethodDataByServiceId(@Param("serviceId") Integer serviceId);
 
     /**
      * 根据类名
@@ -46,4 +49,6 @@ public interface MethodInfoMapper {
     MethodInfo queryByMethodFullName(@Param("methodFullName") String methodFullName);
 
     void batchDeleteByServiceId(@Param("serviceIdList") List<Integer> serviceIdList);
+
+    Integer batchDelete(@Param("idList") List<Integer> idList);
 }

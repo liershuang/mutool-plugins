@@ -35,8 +35,10 @@
       
       <div class="layui-card-body">
         <div style="padding-bottom: 10px;">
-          <button type="button" class="layui-btn" id="jar-upload"><i class="layui-icon"></i>上传文件</button>
+          <button type="button" class="layui-btn" id="jar-upload"><i class="layui-icon"></i>导入jar包</button>
           <button id="batchDel" class="layui-btn layuiadmin-btn-useradmin" data-type="batchdel">批量删除</button>
+          <button id="batchExportMockData" class="layui-btn layuiadmin-btn-useradmin" data-type="batchExport">导出mock数据</button>
+          <button type="button" class="layui-btn" id="mock-data-upload"><i class="layui-icon"></i>导入mock数据</button>
 
           <button id="exitSystem" style="float:right;" class="layui-btn layui-btn-danger">
             <i class="layui-icon layui-extend-exit" style="font-size: 20px;"></i>
@@ -55,7 +57,7 @@
         </script>
 
         <script type="text/html" id="row_operate">
-          <a href="method_list.html?serviceId={{d.id}}" target="_blank" class="layui-btn layui-btn-normal layui-btn-xs">
+          <a href="javascript:;" lay-href="/views/method_list.html?serviceId={{d.id}}" class="layui-btn layui-btn-normal layui-btn-xs">
             <i class="layui-icon layui-icon-edit"></i>查看方法列表
           </a>
           <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
@@ -85,6 +87,25 @@
       ,exts: 'jar' //只允许上传jar文件
       ,done: function(res){
         console.log(res)
+        if (!data.code == 200) {
+          layer.msg(data.msg, {icon: 5});
+        }
+        table.reload('table_service',{});
+      }
+    });
+
+    //mock数据上传
+    upload.render({
+      elem: '#mock-data-upload'
+      ,url: '/mock/importMockData'
+      ,accept: 'file' //普通文件
+      ,exts: 'json|txt' //只允许上传jar文件
+      ,done: function(res){
+        console.log(res)
+        if (!data.code == 200) {
+          layer.msg(data.msg, {icon: 5});
+        }
+        table.reload('table_service',{});
       }
     });
 
@@ -144,7 +165,6 @@
 
     //监听单元格编辑
     table.on('edit(table_service)', function (obj) {
-      debugger;
       $('input').keyup(function () {
         value = value.replace(/[^d.]/g, '');
       });
@@ -223,6 +243,19 @@
             }
           }
         });
+      },
+      batchExport: function(){
+        var checkStatus = table.checkStatus('table_service')
+                ,checkData = checkStatus.data; //得到选中的数据
+
+        var ids = "";
+        checkData.forEach(function(n,i){
+          if(i != 0){ids += ",";}
+          ids += n.id;
+          return;
+        });
+
+        window.location.href = '/mock/exportMockData?serviceIds='+ids;
       }
     };
     
@@ -241,6 +274,8 @@
         success:function (data) {
           if(data.code == '200'){
             layer.msg('退出成功', {time: 1000});
+            //退出系统后刷新页面
+            parent.location.reload();
           }else{
             layer.msg('退出失败');
           }

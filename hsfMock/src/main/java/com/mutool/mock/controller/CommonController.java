@@ -1,13 +1,8 @@
 package com.mutool.mock.controller;
 
-import cn.hutool.core.io.FileUtil;
-import com.mutool.mock.constants.ConfigConstant;
-import com.mutool.mock.util.ConfigUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.Properties;
 
 
 /**

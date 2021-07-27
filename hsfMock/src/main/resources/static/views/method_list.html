@@ -22,11 +22,11 @@
           <div class="layui-inline">
             <label class="layui-form-label">方法名</label>
             <div class="layui-input-block">
-              <input type="text" name="methodName" placeholder="请输入" autocomplete="off" class="layui-input">
+              <input type="text" name="methodFullName" placeholder="请输入" autocomplete="off" class="layui-input">
             </div>
           </div>
           <div class="layui-inline">
-            <button class="layui-btn layuiadmin-btn-useradmin" lay-submit lay-filter="table_search_method">
+            <button class="layui-btn layuiadmin-btn-useradmin" lay-submit lay-filter="table_search">
               <i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
             </button>
           </div>
@@ -37,8 +37,9 @@
         <div style="padding-bottom: 10px;">
           <button id="batchDel" class="layui-btn layuiadmin-btn-useradmin" data-type="batchdel">批量删除</button>
         </div>
+        <div id = "currentData"></div>
 
-        <table id="method_table" lay-filter="method_table"></table>
+        <table id="data_table" lay-filter="data_table"></table>
 
         <script type="text/html" id="table-toolbar">
           <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="mockEdit">
@@ -58,12 +59,11 @@
     base: '../../layuiadmin/' //静态资源所在路径
   }).extend({
     index: 'lib/index' //主入口模块
-  }).use(['index', 'table', 'upload'], function(){
+  }).use(['index', 'table'], function(){
     var $ = layui.$
-    ,form = layui.form
-    ,table = layui.table
-    ,upload = layui.upload,
-    layer = layui.layer;
+      ,form = layui.form
+      ,table = layui.table
+      ,layer = layui.layer;
 
     //url查询参数解析
     function getQueryVariable(variable) {
@@ -77,9 +77,23 @@
     }
 
     var serviceId = getQueryVariable("serviceId");
+    $.ajax({
+      url: "/mock/queryServiceById",
+      type: 'POST',
+      traditional: true,
+      data: {"id": serviceId},
+      success: function (result) {
+        if (result.code == 200) {
+          $("#currentData").html("所属接口："+result.data.className);
+        } else {
+          layer.msg(result.msg, {icon: 5});
+        }
+      }
+    });
+
     var url = "/mock/queryMethodList"+"?serviceId="+serviceId;
     table.render({
-      elem: "#method_table",
+      elem: "#data_table",
       url: url,
       parseData: function(res){ //res 即为原始返回的数据
         return {
@@ -118,17 +132,17 @@
     });
 
     //监听搜索
-    form.on('submit(table_search_method)', function(data){
-      debugger;
+    form.on('submit(table_search)', function(data){
       var field = data.field;
+      debugger;
       //执行重载
-      table.reload('method_table', {
+      table.reload('data_table', {
         where: data.field
       });
     });
 
     //表行数据操作
-    table.on('tool(method_table)', function(obj){
+    table.on('tool(data_table)', function(obj){
       var data = obj.data;
       if(obj.event === 'mockEdit'){
         //打开mock数据编辑框
@@ -162,7 +176,8 @@
     //工具栏事件
     var active = {
       batchdel: function(){
-        var checkStatus = table.checkStatus('method_table')
+        debugger;
+        var checkStatus = table.checkStatus('data_table')
         ,checkData = checkStatus.data; //得到选中的数据
 
         if(checkData.length === 0){
@@ -178,14 +193,14 @@
           return;
         }
         $.ajax({
-          url: '/mock/batchDelteService',
+          url: '/mock/batchDelteMethod',
           type:'post',
           dataType:'json',
-          data: {"serviceIds": delIds},
+          data: {"delIds": delIds},
           success:function (data) {
             if(data.code == '200'){
               layer.msg('删除成功');
-              table.reload('method_table',{});
+              table.reload('data_table',{});
             }else{
               layer.msg(data.msg);
             }

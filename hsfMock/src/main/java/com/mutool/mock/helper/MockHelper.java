@@ -118,5 +118,38 @@ public class MockHelper {
         }
     }
 
+    public void saveServiceInfo(List<HsfServiceInfo> hsfServiceList){
+        if(CollUtil.isEmpty(hsfServiceList)){
+            return;
+        }
+        for(HsfServiceInfo hsfInfo : hsfServiceList){
+            ServiceApi serviceApi = serviceApiMapper.queryByClassName(hsfInfo.getInterfaceName());
+            if(serviceApi == null){
+                ServiceApi addService = new ServiceApi();
+                addService.setClassName(hsfInfo.getInterfaceName());
+                addService.setVersion(StrUtil.isBlank(hsfInfo.getVersion())?MockConstant.HSF_DEFAULT_VERSION:hsfInfo.getVersion());
+                addService.setOnlineStatus(YnEnum.YES.getCode());
+                Integer serviceId = serviceApiService.addServiceInfo(addService);
+                try {
+                    //保存方法信息
+                    methodInfoService.addServiceMethodInfo(serviceId);
+                } catch (Exception e) {
+                    log.error("方法保存异常，接口id："+serviceId, e);
+                }
+            }else{
+                if(StrUtil.isBlank(hsfInfo.getVersion())){
+                    continue;
+                }
+                //数据库版本号为空或入参版本号不为默认版本号则进行更新
+                if(StrUtil.isBlank(serviceApi.getVersion())
+                        || !MockConstant.HSF_DEFAULT_VERSION.equals(hsfInfo.getVersion())){
+                    serviceApiMapper.updateServiceVersionByClassName(hsfInfo.getInterfaceName(), hsfInfo.getVersion());
+                }
+            }
+        }
+    }
+
+
+
 
 }

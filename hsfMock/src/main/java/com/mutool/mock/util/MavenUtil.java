@@ -5,6 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
+import com.mutool.commonweb.domain.settings.util.SysConfigUtil;
 import com.mutool.mock.constants.ConfigConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.shared.invoker.*;
@@ -41,9 +42,8 @@ public class MavenUtil {
         request.setPomFile(pomFile);
         request.setGoals(Collections.singletonList("compile"));
         //设置settings文件
-        //String settingsFilePath = ConfigUtil.get(ConfigConstant.KEY_SETTINGS_FILE_PATH);
-        //todo 取配置
-        String settingsFilePath = "/Users/connie/.m2/settings_servyou.xml";
+        String defaultSettingsFilePath = SystemUtil.getUserInfo().getHomeDir()+"/.m2/settings.xml";
+        String settingsFilePath = SysConfigUtil.getConfigByKey(ConfigConstant.KEY_SETTINGS_FILE_PATH, defaultSettingsFilePath);
         if (StrUtil.isNotBlank(settingsFilePath)) {
             request.setUserSettingsFile(new File(settingsFilePath));
         }
@@ -54,7 +54,10 @@ public class MavenUtil {
         try {
             invoker.execute(request);
         } catch (MavenInvocationException e) {
-            e.printStackTrace();
+            log.error("pom依赖下载出错，请检查日志或到系统配置中配置settings文件地址，" +
+                    "key为："+ConfigConstant.KEY_SETTINGS_FILE_PATH, e);
+            //throw new BizException("pom依赖下载出错，请检查日志或到系统配置中配置settings文件地址，" +
+            //        "key为："+ConfigConstant.KEY_SETTINGS_FILE_PATH);
         }
         pomFile.delete();
         log.info("下载maven依赖jar包完成");

@@ -9,13 +9,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @MapperScan("com.mutool.**.mapper")
 @SpringBootApplication(scanBasePackages = {"com.mutool.mock", "com.mutool.commonweb", "com.mutool.framework"})
-public class ServiceMockApplication {
+public class HsfMockApplication {
 
     public static void main(String[] args) throws Exception {
         // 启动Pandora Boot用于加载Pandora容器
         PandoraBootstrap.run(args);
         //启动spring容器
-        SpringApplication.run(ServiceMockApplication.class, args);
+        SpringApplication.run(HsfMockApplication.class, args);
         //初始化
         init();
         //标记服务启动完成，并设置线程wait。防止业务代码运行完毕退出后，导致容器退出

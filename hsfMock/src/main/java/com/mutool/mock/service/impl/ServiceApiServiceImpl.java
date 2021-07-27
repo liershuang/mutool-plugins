@@ -1,14 +1,19 @@
 package com.mutool.mock.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import com.mutool.mock.bean.dto.MethodMock;
 import com.mutool.mock.bean.model.ServiceApi;
 import com.mutool.mock.mapper.MethodInfoMapper;
 import com.mutool.mock.mapper.ServiceApiMapper;
+import com.mutool.mock.bean.dto.ServiceMock;
 import com.mutool.mock.service.ServiceApiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 描述：<br>
@@ -47,6 +52,11 @@ public class ServiceApiServiceImpl implements ServiceApiService {
     }
 
     @Override
+    public List<ServiceApi> queryServiceList(List<Integer> idList) {
+        return serviceApiMapper.queryServiceList(idList);
+    }
+
+    @Override
     public void updateServiceVersion(Integer serviceId, String version) {
         serviceApiMapper.updateServiceVersionByServiceId(serviceId, version);
     }
@@ -57,6 +67,42 @@ public class ServiceApiServiceImpl implements ServiceApiService {
         methodInfoMapper.deleteByServiceId(serviceId);
     }
 
+    @Override
+    public ServiceApi queryServiceById(Integer id) {
+        return serviceApiMapper.queryServiceApiById(id);
+    }
+
+    @Override
+    public List<ServiceMock> queryServiceMockData(List<Integer> idList) {
+        List<ServiceApi> serviceList = queryServiceList(idList);
+        if(CollUtil.isEmpty(serviceList)){
+            return Collections.emptyList();
+        }
+        return serviceList.stream().map(i -> {
+            ServiceMock serviceMock = new ServiceMock();
+            serviceMock.setServiceClass(i.getClassName());
+            List<MethodMock> methodMockList = methodInfoMapper.queryMethodDataByServiceId(i.getId());
+            serviceMock.setMockMethodDataList(methodMockList);
+            return serviceMock;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public void importMockData(List<ServiceMock> serviceMockList){
+        if(CollUtil.isEmpty(serviceMockList)){
+            return;
+        }
+        serviceMockList.forEach(i -> {
+            ServiceApi serviceApi = serviceApiMapper.queryByClassName(i.getServiceClass());
+            if(serviceApi == null || CollUtil.isEmpty(i.getMockMethodDataList())){
+                //无此接口不设置，return跳过本条数据
+                return;
+            }
+            i.getMockMethodDataList().forEach(methodInfo -> {
+                methodInfoMapper.setMockDataByMethodFullName(methodInfo.getMethodFullName(), methodInfo.getMockData());
+            });
+        });
+    }
 
 
 }

@@ -49,7 +49,7 @@ public class MethodInfoServiceImpl implements MethodInfoService {
     @Override
     @Transactional
     public void addServiceMethodInfo(Integer serviceId) {
-        ServiceApi serviceApi = serviceApiMapper.queryServiceApiByServiceId(serviceId);
+        ServiceApi serviceApi = serviceApiMapper.queryServiceApiById(serviceId);
         if(serviceApi == null){
             throw new BizException("接口不存在");
         }
@@ -66,8 +66,12 @@ public class MethodInfoServiceImpl implements MethodInfoService {
             methodInfo.setMethodName(methodMsg.getMethodName());
             methodInfo.setMethodFullName(methodMsg.getMethodFullName());
             methodInfo.setReturnClass(methodMsg.getReturnClass());
-            //todo 解析返回class类，转为json作为mock数据
-            //methodInfo.setMockData("");
+            try {
+                //解析返回class类，转为json作为mock数据
+                methodInfo.setMockData(ClassUtil.turnClassToJson(Class.forName(methodMsg.getReturnClass())));
+            } catch (Exception e) {
+                log.error("返回类转化为json初始化数据异常", e);
+            }
             addMethodInfo(methodInfo);
         }
     }
@@ -90,6 +94,9 @@ public class MethodInfoServiceImpl implements MethodInfoService {
      */
     @Override
     public List<MethodInfo> queryMethodsByServiceId(Integer serviceId) {
+        if(serviceId == null){
+            throw new BizException("接口id参数不能为空");
+        }
         return methodInfoMapper.queryByServiceId(serviceId);
     }
 
@@ -112,6 +119,11 @@ public class MethodInfoServiceImpl implements MethodInfoService {
     @Override
     public void deleteMethod(Integer methodId) {
         methodInfoMapper.deleteByMethodId(methodId);
+    }
+
+    @Override
+    public void batchDelete(List<Integer> idList) {
+        methodInfoMapper.batchDelete(idList);
     }
 
 }

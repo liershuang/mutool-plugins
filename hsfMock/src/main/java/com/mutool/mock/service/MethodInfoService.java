@@ -2,6 +2,8 @@ package com.mutool.mock.service;
 
 import com.mutool.mock.bean.model.MethodInfo;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -36,9 +38,11 @@ public interface MethodInfoService {
 
     List<MethodInfo> queryMethodsByServiceId(Integer serviceId);
 
-    String queryMockDataByMethodId(Integer methodId);
+    String queryMockDataByMethodId(@Valid @NotNull(message = "方法id不能为空") Integer methodId);
 
     void setMockData(Integer methodId, String mockData);
 
     void deleteMethod(Integer methodId);
+
+    void batchDelete(List<Integer> idList);
 }

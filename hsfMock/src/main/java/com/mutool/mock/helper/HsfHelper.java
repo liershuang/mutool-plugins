@@ -2,6 +2,7 @@ package com.mutool.mock.helper;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.mutool.core.exception.BizException;
 import com.mutool.mock.model.HsfServiceInfo;
 import com.mutool.mock.proxy.MockInvoker;
 import com.mutool.mock.util.JarUtil;
@@ -54,23 +55,25 @@ public class HsfHelper {
                 log.error("获取接口class对象异常，接口为：{}", hsfServiceInfo.getInterfaceName(), e);
                 continue;
             }
-            HSFApiProviderBean hsfApiProviderBean = new HSFApiProviderBean();
-            hsfApiProviderBean.setServiceInterface(hsfServiceInfo.getInterfaceName());
-            if (StrUtil.isBlank(hsfServiceInfo.getVersion())) {
-                hsfApiProviderBean.setServiceVersion("1.0.0");
-            } else {
-                hsfApiProviderBean.setServiceVersion(hsfServiceInfo.getVersion());
-            }
-            hsfApiProviderBean.setServiceGroup("HSF");
-            //生成代理实现类
-            Object serviceProxy = MockInvoker.getInstance(clazz);
-            hsfApiProviderBean.setTarget(serviceProxy);
-            // 初始化Provider Bean，发布服务
+
             try {
+                HSFApiProviderBean hsfApiProviderBean = new HSFApiProviderBean();
+                hsfApiProviderBean.setServiceInterface(hsfServiceInfo.getInterfaceName());
+                if (StrUtil.isBlank(hsfServiceInfo.getVersion())) {
+                    hsfApiProviderBean.setServiceVersion("1.0.0");
+                } else {
+                    hsfApiProviderBean.setServiceVersion(hsfServiceInfo.getVersion());
+                }
+                hsfApiProviderBean.setServiceGroup("HSF");
+                //生成代理实现类
+                Object serviceProxy = MockInvoker.getInstance(clazz);
+                hsfApiProviderBean.setTarget(serviceProxy);
+                // 初始化Provider Bean，发布服务
                 hsfApiProviderBean.init();
             } catch (Exception e) {
                 log.error("接口发布异常，接口为：{}", hsfServiceInfo.getInterfaceName(), e);
                 e.printStackTrace();
+                throw new BizException("hsf接口注册失败，请检查edas容器是否启动");
             }
             succeessServiceList.add(hsfServiceInfo);
         }

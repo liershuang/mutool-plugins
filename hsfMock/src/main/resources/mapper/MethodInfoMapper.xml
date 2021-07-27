@@ -34,8 +34,19 @@
         </foreach>
     </delete>
 
+    <delete id="batchDelete">
+        delete from method_info where id in
+        <foreach item="item" index="index" collection="idList"  open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
     <select id="queryByServiceId" resultType="com.mutool.mock.bean.model.MethodInfo">
         select <include refid="Column_List_WithoutMockData"/> from method_info where service_id = #{serviceId}
+    </select>
+
+    <select id="queryMethodDataByServiceId" resultType="com.mutool.mock.bean.dto.MethodMock">
+        select method_full_name, mock_data from method_info where service_id = #{serviceId}
     </select>
 
     <select id="queryList" resultType="com.mutool.mock.bean.model.MethodInfo">
